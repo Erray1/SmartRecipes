@@ -8,5 +8,4 @@ public interface IDomainDataAdder
     public Task<(bool, string?)> AddIngredient(CreateIngredientModel model);
     public Task<(bool, string?)> AddShop(CreateShopModel model);
     public Task<(bool, string?)> AddRecipe(CreateRecipeModel model);
-    public Task<(bool, string?)> AddImage(CreateImageModel model);
 }

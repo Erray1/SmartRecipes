@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.FeatureManagement.Mvc;
 using SmartRecipes.DataContext.Recipes.Generators;
 using SmartRecipes.DataContext.Recipes.Generators.Models;
 
@@ -9,6 +7,7 @@ namespace SmartRecipes.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[FeatureGate("CreateEntities")]
 public sealed class CreateController : ControllerBase
 {
     private readonly IDomainDataAdder domainDataAdder;

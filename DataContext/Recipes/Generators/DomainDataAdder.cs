@@ -24,11 +24,6 @@ public sealed class DomainDataAdder : IDomainDataAdder
         return affected == 1 ? (true, null) : (false, "Ошибка добавления");
     }
 
-    public Task<(bool, string?)> AddImage(CreateImageModel model)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task<(bool, string?)> AddIngredient(CreateIngredientModel model)
     {
         Ingredient newEntity = new()
@@ -46,7 +41,13 @@ public sealed class DomainDataAdder : IDomainDataAdder
         if (foundCategory is null) { return (false, "Не найдена категория с таким именем"); }
 
         Image? foundImage = await db.Images.SingleOrDefaultAsync(e => e.ImageURL == model.ImageName);
-        if (foundImage is null) { return (false, "Не найден файл картинки с таким именем"); }
+        if (foundImage is not null) { return (false, $"Картинка уже используется для {foundImage.RecipeWhereUsed.RecipeName}"); }
+
+        Image newImage = new()
+        {
+            ImageURL = Path.Combine("img", "recipes", model.ImageName)
+        };
+        var addedImage = await db.Images.AddAsync(newImage);
 
         Recipe newRecipe = new()
         {
@@ -60,21 +61,29 @@ public sealed class DomainDataAdder : IDomainDataAdder
                     .Select(m => m.Key)
                     .Contains(e.IngredientName))
                     .ToListAsync(),
-            RecipeImage = foundImage,
+            RecipeImage = addedImage.Entity,
         };
-        await db.Recipes.AddAsync(newRecipe);
+        var addedRecipe = await db.Recipes.AddAsync(newRecipe);
+        var recipe = addedRecipe.Entity;
+        var img = addedImage.Entity;
+        img.RecipeWhereUsed = recipe;
+        addedImage.State = EntityState.Modified;
 
-        await db.IngredientAmounts
-            .AddRangeAsync(model.Ingredients
+        var amounts = model.Ingredients
                 .Select(x => new IngredientAmountForRecipe()
                 {
                     IngredientID = db.Ingredients.FirstOrDefault(y => y.IngredientName == x.Key)?.ID ?? "0",
-                    RecipeID = newRecipe.ID,
+                    Ingredient = db.Ingredients.FirstOrDefault(y => y.IngredientName == x.Key) ?? new(),
+                    RecipeID = addedRecipe.Entity.ID,
+                    Recipe = addedRecipe.Entity,
                     Amount = x.Value
-                }));
+                });
+        db.AddRange(amounts);
 
-        foundCategory.RecipesWhereUsed.Add(newRecipe);
-        // db.Categories.Update(foundCategory);
+        recipe.IngredientsAmounts = amounts.ToList();
+        foundCategory.RecipesWhereUsed.Add(newRecipe);;
+        addedRecipe.State = EntityState.Modified;
+        
         int affected = await db.SaveChangesAsync();
         if (affected == 0) return (false, "Ошибка при обновлении базы данных");
 
@@ -85,8 +94,8 @@ public sealed class DomainDataAdder : IDomainDataAdder
     public async Task<(bool, string?)> AddShop(CreateShopModel model)
     {
         var notExistingIngredients = db.Ingredients
-             .Where(e => !model.AvalableIngredients.Keys
-              .Contains(e.IngredientName));
+             .ExceptBy(model.AvalableIngredients.Keys, x => x.IngredientName);
+
         if (notExistingIngredients.Count() != 0)
         {
             List<string> notExistingIngredientNames = await notExistingIngredients.Select(e => e.IngredientName).ToListAsync();
@@ -94,8 +103,7 @@ public sealed class DomainDataAdder : IDomainDataAdder
         }
 
         List<Ingredient> existingIngredients = await db.Ingredients
-            .Where(e => model.AvalableIngredients.Keys
-            .Contains(e.IngredientName))
+            .IntersectBy(model.AvalableIngredients.Keys, x => x.IngredientName)
             .ToListAsync();
 
         Shop newShop = new()
@@ -105,15 +113,21 @@ public sealed class DomainDataAdder : IDomainDataAdder
             AvailableIngredients = existingIngredients,
         };
 
-        await db.Shops.AddAsync(newShop);
+        var addedShop = await db.Shops.AddAsync(newShop);
 
-        await db.IngredientPrices.AddRangeAsync(newShop.AvailableIngredients
+        var prices = newShop.AvailableIngredients
             .Select(x => new IngredientPriceForShop()
             {
-                IngredientID = x.ID,
+                Ingredient = x,
+                Shop = addedShop.Entity,
                 Price = model.AvalableIngredients[x.IngredientName],
-                ShopID = newShop.ID
-            }));
+            })
+            .ToList();
+
+        db.IngredientPrices.AddRange(prices);
+
+        addedShop.Entity.IngredientPrices = prices;
+        addedShop.State = EntityState.Modified;
 
         for (int i = 0; i < existingIngredients.Count; i++)
         {
@@ -124,18 +138,5 @@ public sealed class DomainDataAdder : IDomainDataAdder
 
         int affected = await db.SaveChangesAsync();
         return affected == 1 ? (true, null) : (false, "Ошибка добавления");
-
-
-        //if (model.AvalableIngredientNames.Count() != foundIngredients.Count()) {
-        //    var notExistingIngredientNames = model.AvalableIngredientNames
-        //        .Where(e => !foundIngredients
-        //            .Select(e => e.IngredientName)
-        //            .Contains(e));
-        //    newIngredients = notExistingIngredientNames.Select(e => new Ingredient()
-        //    {
-        //        IngredientName = e,
-        //        ShopsWhereAvailable = model
-        //    })
-        //}
     }
 }

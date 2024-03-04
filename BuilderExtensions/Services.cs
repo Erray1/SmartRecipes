@@ -1,10 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using SmartRecipes.DataContext.Repos.Filters.Shops.Filters;
+using SmartRecipes.Services.PathCalculator;
+using SmartRecipes.Services.Rating;
+using SmartRecipes.Services.Recomendations;
+using SmartRecipes.Services.SearchEngines;
 using System.Text;
 
 namespace SmartRecipes.BuilderExtensions;
 
-public static class JWTAuthBuilderExtensions
+public static partial class BuilderExtensions
 {
     public static IServiceCollection AddJWTAuthentificationAndAuthorization(this IServiceCollection services, IConfiguration config)
     {
@@ -30,5 +35,21 @@ public static class JWTAuthBuilderExtensions
         });
 
         return services;
-    } 
+    }
+    public static IServiceCollection AddCustomServices(this IServiceCollection services)
+    {
+        services.AddScoped<SimpleStrictSearch>();
+        services.AddScoped<SimpleLargeInputSearch>();
+
+        services.AddScoped<UserActionService>();
+
+        services.AddScoped<IShopsFilter, ShopsFilterV1>();
+        services.AddScoped<IPathFinder, RandomPathFinderService>();
+
+        services.AddScoped<RecomendationsService>();
+        services.AddScoped<RecomendationsMaker>();
+        services.AddScoped<SearchTokensWorker>();
+
+        return services;
+    }
 }
