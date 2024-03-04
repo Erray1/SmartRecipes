@@ -1,0 +1,52 @@
+﻿@namespace SmartRecipes.Client.Components
+@using SmartRecipes.Shared.DTO.Recipes
+@using SmartRecipes.Application.Utilities
+<!--Важно прописать namespace-->
+
+<NavLink href="@($"recipes/{Model.ID}")">
+    <div class="card @cardType scale">
+        <img class="images" src="@Model.Image">
+        <div>
+            <p class="card-title">@Model.Name</p>
+            <p class="text">@Model.IngedientsCount ингредиентов | @Model.TimeToCook час(ов)</p>
+            <div class="reactions">
+                <img src="img/like.png" width="7%" height="7%" />
+                <p class="text">@Model.Rating["likes"]</p>
+                <img src="img/dislike.png" width="7%" height="7%" />
+                <p class="text">@Model.Rating["dislikes"]</p>
+            </div>
+        </div>
+    </div>
+</NavLink>
+
+
+@code {
+    [Parameter]
+    public CardTypes CardType { get; set; }
+
+    [Parameter]
+    public RecipePreviewData Model { get; set; }
+
+    private string? cardType;
+
+    protected override void OnInitialized()
+    {
+        cardType = CardType switch
+        {
+            CardTypes.Small => "",
+            CardTypes.Wide => "long",
+            _ => ""
+        };
+        Model = new()
+            {
+                Name = "Пирог с говном",
+                IngedientsCount = 8,
+                TimeToCook = 1,
+                Rating = new() { { "likes", 17 }, { "dislikes", 10 } },
+                Image = "img/8_march.jpeg",
+                ID = "1"
+            };
+    }
+
+
+}

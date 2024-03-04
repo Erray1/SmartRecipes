@@ -1,0 +1,45 @@
+﻿.card-title {
+    margin: 0px 25px 10px;
+    font-size: 1.25em;
+    font-family: 'Press Start 2P';
+}
+
+input:focus {
+    outline: none !important;
+}
+
+.auth input {
+    background-color: #e9e9e9;
+    float: left;
+    margin: 0.5vh 0.5vw;
+    padding: 0.5vh;
+    font-size: 1em;
+    font-family: 'Minecraft';
+    border: black;
+    border-width: 1px;
+}
+
+.auth {
+    background: #e9e9e9;
+    width: 450px;
+    padding: 2vh 2vw 0px;
+    display: inline-block;
+    border-radius: 0.8em;
+    height: 60vh;
+    margin: 0 2vw;
+}
+
+.access {
+    width: 100%;
+    height: 30px;
+    background-color: #9ACD32;
+    color: #fff;
+    font-family: 'Press Start 2P';
+    border-width: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-style: outset;
+    border-image: initial;
+    /*border-color: buttonborder;*/
+}

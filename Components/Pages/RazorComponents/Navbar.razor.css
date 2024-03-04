@@ -1,0 +1,39 @@
+﻿.header {
+	display: flex;
+	position: absolute;
+	background: #9ACD32;
+	left: 0;
+	right: 0;
+	top: 0;
+	height: 5vh;
+	color: #006400;
+	justify-content: space-between;
+	font-family: 'Press Start 2P';
+}
+
+a {
+	text-decoration: none;
+	color: #006400;
+}
+
+.nav_home {
+	margin: 8px auto;
+	padding: 0 auto;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.nav {
+	margin: 1.5vh auto;
+	text-align: center;
+	vertical-align: middle;
+	font-size: 2vh;
+}
+
+.scale {
+	transition: 0.4s;
+}
+
+.scale:hover {
+	transform: scale(1.2);
+}
