@@ -1,0 +1,39 @@
+﻿.search {
+    background-color: #e9e9e9;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50vw;
+    height: 35px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: none;
+}
+
+input:focus {
+    outline: none !important;
+}
+
+.search input[type=text] {
+    background-color: #e9e9e9;
+    margin: 0.3vh 0.5vw;
+    padding: 0.5vh;
+    font-size: 1em;
+    font-family: 'Minecraft';
+    border: none;
+}
+
+.search-container {
+    float: right;
+    background: #e9e9e9;
+    border-radius: 10px;
+    padding: 0.2vh 0.2vw;
+    border: none;
+    cursor: pointer;
+    /*margin-right: 0.4vw;*/
+}
+
+.search-container:hover {
+    background: #ccc;
+}

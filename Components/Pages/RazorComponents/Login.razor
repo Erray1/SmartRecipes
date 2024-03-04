@@ -1,0 +1,27 @@
+﻿@namespace SmartRecipes.Client.Components
+@using SmartRecipes.Shared.Models.Accounts
+
+<div style="float: left;">
+    <EditForm class="auth" Model="Model" OnSubmit="Submit">
+        <p class="card-title">Вход</p>
+        <InputText placeholder="Введите почту" @bind-Value="Model.Email"></InputText>
+        <InputText placeholder="Введите пароль" @bind-Value="Model.Password"></InputText>
+        <button class="access" type="submit">Войти</button>
+    </EditForm>
+</div>
+
+@code {
+
+    private LoginModel Model { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Model = new();
+    }
+
+    private void Submit()
+    {
+
+    }
+
+}

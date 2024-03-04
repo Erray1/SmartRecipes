@@ -1,7 +1,18 @@
-﻿@page "/"
+﻿@page "/home"
+@namespace SmartRecipes.Server.Components.Pages.RazorComponents
+@using SmartRecipes.Application.Utilities
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
+<div class="body">
+    <div class="main">
+        <SearchBar />
+        <p class="pop-recepies-title">Популярные рецепты:</p>
+        <div class="pop-recepies">
+            <Card CardType="CardTypes.Small" Model="new()" />
+            <Card CardType="CardTypes.Small" Model="new()" />
+            <Card CardType="CardTypes.Small" Model="new()" />
+            <Card CardType="CardTypes.Small" Model="new()" />
+        </div>
+    </div>
+</div>

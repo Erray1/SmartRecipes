@@ -1,0 +1,26 @@
+﻿@namespace SmartRecipes.Client.Components
+@using Shared.Models.Search
+
+<EditForm class="search" Model="Model" OnSubmit="Submit">
+    <InputText class="search input" @bind-Value="Model.SearchString"></InputText>
+    <button class="search-container" type="submit">
+        <img src="img/search.png" width="25px" height="25px">
+    </button>
+</EditForm>
+
+@code {
+    [Inject]
+    public NavigationManager navManager { get; set; }
+
+    public SearchRequest Model { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Model = new();
+    }
+    private void Submit()
+    {
+        
+    }
+
+}
