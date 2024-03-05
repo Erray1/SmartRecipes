@@ -1,14 +1,53 @@
-﻿@namespace SmartRecipes.Client.Components
+﻿@rendermode InteractiveServer
+
+@namespace SmartRecipes.Client.Components
 <!--Важно прописать namespace-->
 
-<div class="header">
-    <NavLink class="nav_home" href="home">
-        <img src="img/logo.svg" width="100%" height="100%" alt="главная">
-    </NavLink>
-    <NavLink class="nav scale" href="popular">популярное</NavLink>
-    <NavLink class="nav scale" href="recommendations">рекомендации</NavLink>
-    <NavLink class="nav scale" href="liked">избранное</NavLink>
-    <NavLink class="nav_home" href="sign_in">
-        <img src="img/log-in.png" width="100%" height="100%" alt="аккаунт">
-    </NavLink>
-</div>
+
+<CascadingAuthenticationState>
+    <AuthorizeView>
+        <Authorized>
+            <div class="header">
+                <NavLink class="nav_home" href="home">
+                    <img src="img/logo.svg" width="100%" height="100%" alt="главная">
+                </NavLink>
+                <NavLink class="nav scale" href="popular">популярное</NavLink>
+                <NavLink class="nav scale" href="recommendations">рекомендации</NavLink>
+                <NavLink class="nav scale" href="liked">избранное</NavLink>
+                <NavLink class="nav_home" href="sign_in">
+                    <img src="img/log-in.png" width="100%" height="100%" alt="аккаунт">
+                </NavLink>
+            </div>
+        </Authorized>
+        <NotAuthorized>
+            <div class="header">
+                <NavLink class="nav_home" href="home">
+                    <img src="img/logo.svg" width="100%" height="100%" alt="главная">
+                </NavLink>
+                <NavLink class="nav scale" href="popular">популярное</NavLink>
+                <div @onclick="@(() => ShowNotAuthorizedPopup("рекомендации"))" class="nav scale scale-div">рекомендации</div>
+                <div @onclick="@(() => ShowNotAuthorizedPopup("избранное"))" class="nav scale scale-div">избранное</div>
+                <NavLink class="nav_home" href="sign_in">
+                    <img src="img/log-in.png" width="100%" height="100%" alt="аккаунт">
+                </NavLink>
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
+</CascadingAuthenticationState>
+
+@code {
+    [Inject]
+    private IJSRuntime js { get; set; }
+
+    [Inject]
+    private NavigationManager navManager { get; set; }
+
+    public async Task ShowNotAuthorizedPopup(string actionName)
+    {
+        var answer = await js.InvokeAsync<bool>("confirm", $"Чтобы перейти в {actionName}, нужно войти в аккаунт или зерегистрироваться\nПерейти на страницу авторизации?");
+        if (answer)
+        {
+            navManager.NavigateTo("sign_in");
+        }
+    }
+}

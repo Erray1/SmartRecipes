@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.FeatureManagement.Mvc;
 using SmartRecipes.DataContext.Recipes.Generators;
 using SmartRecipes.DataContext.Recipes.Generators.Models;
 
@@ -9,6 +7,7 @@ namespace SmartRecipes.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[FeatureGate("CreateEntities")]
 public sealed class CreateController : ControllerBase
 {
     private readonly IDomainDataAdder domainDataAdder;
@@ -18,6 +17,7 @@ public sealed class CreateController : ControllerBase
         this.domainDataAdder = domainDataAdder;
 
     }
+
     [HttpPost("category")]
     public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryModel? model)
     {
@@ -39,6 +39,7 @@ public sealed class CreateController : ControllerBase
         if (!succesful) return StatusCode(StatusCodes.Status500InternalServerError, error);
         return NoContent();
     }
+
     [HttpPost("shop")]
     public async Task<IActionResult> CreateShop([FromBody] CreateShopModel? model)
     {
@@ -49,6 +50,7 @@ public sealed class CreateController : ControllerBase
         if (!succesful) return StatusCode(StatusCodes.Status500InternalServerError, error);
         return NoContent();
     }
+
     [HttpPost("recipe")]
     public async Task<IActionResult> CreateRecipe([FromBody] CreateRecipeModel? model)
     {

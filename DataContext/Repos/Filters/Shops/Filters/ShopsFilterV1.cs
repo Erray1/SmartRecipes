@@ -23,9 +23,9 @@ public sealed class ShopsFilterV1 : IShopsFilter
                 .Where(s => s.AvailableIngredients
                     .Select(ingr => ingr.ID)
                     .Contains(ingrId))
-                .Select(s => s.IngredientPrices.Where(p => p.IngredientID == ingrId).First())
+                .Select(s => s.IngredientPrices.Where(p => p.Ingredient.ID == ingrId).First())
                 .TakeBestOffer(options, pathFinder, pathTimeStorage))
-            .GroupBy(x => x.ShopID)
+            .GroupBy(x => x.Shop.ID)
             .Select(x => new ShopData
             {
                 Ingredients = x.Select(e => new IngredientPriceData

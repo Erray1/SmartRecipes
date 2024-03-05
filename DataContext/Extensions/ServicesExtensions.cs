@@ -21,7 +21,10 @@ public static partial class ServicesExtensions
     {
         
         services.AddDbContext<UsersContext>(options => {
-            options.UseNpgsql(configuration.GetConnectionString("WebApiPostgreSQLDatabase"));
+            options.UseNpgsql(configuration.GetConnectionString("WebApiPostgreSQLDatabase"), providerOptions =>
+            {
+                providerOptions.SetPostgresVersion(new Version(""));
+            });
             options.LogTo(Console.WriteLine, new[] { Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.CommandExecuting });
         });
         services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<UsersContext>();

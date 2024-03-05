@@ -65,8 +65,8 @@ public class RecipesContext : DbContext
             .HasMany(e => e.AvailableIngredients)
             .WithMany(e => e.ShopsWhereAvailable)
             .UsingEntity<IngredientPriceForShop>(
-                l => l.HasOne<Ingredient>().WithMany(e => e.PriceInShops).HasForeignKey(e => e.ShopID),
-                r => r.HasOne<Shop>().WithMany(e => e.IngredientPrices).HasForeignKey(e => e.IngredientID),
+                l => l.HasOne<Ingredient>().WithMany(e => e.PriceInShops)/*.HasForeignKey(e => e.ShopID)*/,
+                r => r.HasOne<Shop>().WithMany(e => e.IngredientPrices)/*.HasForeignKey(e => e.IngredientID)*/,
                 j => j.Property(e => e.Price).HasDefaultValueSql("0")); // Проставить тип
         modelBuilder.Entity<Shop>()
             .Property(e => e.Name)
@@ -89,12 +89,13 @@ public class RecipesContext : DbContext
             .UsingEntity<IngredientAmountForRecipe>(
                 l => l.HasOne(e => e.Ingredient).WithMany(e => e.AmountsForRecipes).HasForeignKey(e => e.RecipeID),
                 r => r.HasOne(e => e.Recipe).WithMany(e => e.IngredientsAmounts).HasForeignKey(e => e.IngredientID),
-                j => j.Property(e => e.Amount).HasDefaultValueSql("0 кг")
+                j => j.Property(e => e.Amount)
             );
 
         modelBuilder.Entity<Recipe>()
             .HasOne(e => e.RecipeImage)
-            .WithOne(e => e.RecipeWhereUsed);
+            .WithOne(e => e.RecipeWhereUsed)
+            .HasForeignKey<Image>();
 
         modelBuilder.Entity<Recipe>()
             .Property(e => e.Rating)

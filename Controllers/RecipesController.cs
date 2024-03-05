@@ -32,14 +32,16 @@ public sealed class RecipesController : ControllerBase
         return Ok(response);
     }
 
-    [HttpGet("get-favourite")]
+    [HttpGet("get-liked")]
     [ProducesResponseType(200)]
     [ProducesResponseType(400)]
     [Authorize]
-    public async Task<IActionResult> GetFavouriteRecipes(UserManager<User> userManager)
+    public async Task<IActionResult> GetLikedRecipes(UserManager<User> userManager)
     {
-        User user = (await userManager.FindByIdAsync(User.FindFirst(ClaimTypes.NameIdentifier)!.Value))!;
-        var response = await repo.GetRecipesByIDAsync(user.LikedRecipesIDs);
+        User user = (await userManager.FindByEmailAsync(User.FindFirst(ClaimTypes.Email)!.Value))!;
+        var response = await repo.GetRecipesByIDPagedAsync(user.LikedRecipesIDs, 
+            Convert.ToInt32(Request.Query["itemsPerPage"]),
+            Convert.ToInt32(Request.Query["currentPage"]));
         
         if (!response.IsSuccesful)
         {
@@ -52,11 +54,11 @@ public sealed class RecipesController : ControllerBase
     [ProducesResponseType(200)]
     [ProducesResponseType(400)]
     [Authorize]
-    public async Task<IActionResult> GetRecommendedRecipes(RecomendationsService recs)
+    public async Task<IActionResult> GetRecommendedRecipes(RecomendationsService recs, UserManager<User> userManager)
     {
-        string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        User user = (await userManager.FindByEmailAsync(User.FindFirst(ClaimTypes.Email)!.Value))!;
 
-        var response = await recs.GetRecomendationsPagedAsync(userId!,
+        var response = await recs.GetRecomendationsPagedAsync(user.Id!,
             Convert.ToInt32(Request.Query["itemsPerPage"]),
             Convert.ToInt32(Request.Query["currentPage"]));
 
@@ -73,9 +75,9 @@ public sealed class RecipesController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetLatestRecipes(UserManager<User> userManager)
     {
-		string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
-        User user = (await userManager.FindByIdAsync(userId))!;
-		var data = await repo.GetRecipesByIDAsync(user.LastVisitedRecipesIDs.Items);
+        User user = (await userManager.FindByEmailAsync(User.FindFirst(ClaimTypes.Email)!.Value))!;
+
+        var data = await repo.GetRecipesByIDAsync(user.LastVisitedRecipesIDs.Items);
         if (!data.IsSuccesful)
         {
             return NotFound(data);
