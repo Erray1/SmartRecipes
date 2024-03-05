@@ -2,7 +2,6 @@ using SmartRecipes.DataContext.Extensions;
 using SmartRecipes.BuilderExtensions;
 using SmartRecipes.DataContext.Repos.Extensions;
 using SmartRecipes.Components;
-using Microsoft.FeatureManagement;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +14,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddClientSideServices();
 
 builder.Services.AddRecipesContext(builder.Configuration);
 builder.Services.AddUsersContext(builder.Configuration);

@@ -1,5 +1,9 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Blazored.LocalStorage;
+using Blazored.Modal;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using SmartRecipes.Application.API;
+using SmartRecipes.Application.Authorization;
 using SmartRecipes.DataContext.Repos.Filters.Shops.Filters;
 using SmartRecipes.Services.PathCalculator;
 using SmartRecipes.Services.Rating;
@@ -50,6 +54,18 @@ public static partial class BuilderExtensions
         services.AddScoped<RecomendationsMaker>();
         services.AddScoped<SearchTokensWorker>();
 
+        return services;
+    }
+
+    public static IServiceCollection AddClientSideServices(this IServiceCollection services)
+    {
+        services.AddHttpClient();
+        services.AddBlazoredModal();
+        services.AddBlazoredLocalStorage();
+        services.AddScoped<SmartRecipesAPIClient>();
+        services.AddScoped<IAuthAPIClient, AuthAPIClient>();
+        services.AddScoped<SmartRecipesAuthenticationStateProvider>();
+        // services.AddCascadingAuthenticationState(); 
         return services;
     }
 }

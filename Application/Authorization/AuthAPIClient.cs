@@ -7,12 +7,12 @@ using System.Net.Http.Headers;
 
 namespace SmartRecipes.Application.Authorization;
 
-public class AuthApiService : IAuthApiService
+public class AuthAPIClient : IAuthAPIClient
 {
     private readonly HttpClient httpClient;
     private readonly AuthenticationStateProvider authProvider;
     private readonly ILocalStorageService localStorage;
-    public AuthApiService(HttpClient httpClient,
+    public AuthAPIClient(HttpClient httpClient,
         AuthenticationStateProvider authenticationStateProvider,
         ILocalStorageService localStorage)
     {

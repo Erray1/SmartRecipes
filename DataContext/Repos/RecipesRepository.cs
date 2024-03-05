@@ -93,6 +93,30 @@ public sealed class RecipesRepository : IRecipesRepository
             Content = recipesFound.Select(x => RecipesDTOMapper.ToDTOShortened(x)).ToList()
         };
     }
+    public async Task<RecipeListDto<RecipePreviewData>> GetRecipesByIDPagedAsync(IEnumerable<string> IDs, int itemsPerPage, int currentPage)
+    {
+        var recipesFound = await db.Recipes
+            .IntersectBy(IDs, x => x.ID)
+            .Skip(itemsPerPage * (currentPage - 1))
+            .Take(itemsPerPage)
+            .ToListAsync();
+
+        if (recipesFound.Count() < IDs.Count())
+        {
+            return new()
+            {
+                IsSuccesful = false,
+                Errors = new() { "Не найдены некоторые рецепты" },
+                Content = new()
+            };
+        }
+
+        return new()
+        {
+            IsSuccesful = true,
+            Content = recipesFound.Select(x => RecipesDTOMapper.ToDTOPreview(x)).ToList()
+        };
+    }
 
     public RecipeListDto<RecipeShortenedData> SearchFirstRecipes(int itemsCount, string searchString)
     {
