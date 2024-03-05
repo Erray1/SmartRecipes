@@ -1,0 +1,58 @@
+﻿@page "/recipes"
+@namespace SmartRecipes.Server.Components.Pages.RazorComponents
+@using SmartRecipes.Shared.DTO.Recipes
+@using SmartRecipes.Application.Utilities
+
+<PageTitle>Popular</PageTitle>
+
+<div class="body">
+    <div class="main">
+        <div class="recipe-page">
+            <img class="spec-images" src="@Model.Image">
+            <div>
+                <p class="card-title">@Model.Name</p>
+                <p>@Model.IngedientsCount ингредиентов | @Model.TimeToCook час</p>
+                <div class="reactions">
+                    <img src="img/like.png" width="7%" height="7%">
+                    <p class="text">@Model.Rating["likes"]</p>
+                    <img src="img/dislike.png" width="7%" height="7%">
+                    <p class="text">@Model.Rating["dislikes"]</p>
+                        <img src="img/bookmark.png" width="7%" height="7%">
+                        <p class="text">Добавить в избранное</p>
+                </div>
+            </div>
+            <div class="ingredients">
+                <p class="card-title">Ингредиенты</p>
+                <p>Тест-o</p>
+                <input type="checkbox">
+                <!--
+                <label class="switch">
+                    <input type="checkbox">
+                    <span class="slider round"></span>
+                </label>
+                -->
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    [Parameter]
+    public RecipePreviewData Model { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Model = new()
+            {
+                Name = "Пирог с говном",
+                IngedientsCount = 8,
+                TimeToCook = 1,
+                Rating = new() { { "likes", 17 }, { "dislikes", 10 } },
+                Image = "img/8_march.jpeg",
+                ID = "1"
+            };
+    }
+
+
+}
