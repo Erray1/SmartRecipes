@@ -2,7 +2,8 @@
 @using Shared.Models.Accounts
 
 <div style="float: right;">
-    <EditForm class="auth" Model="Model" OnSubmit="Submit">
+    <EditForm class="auth" Model="Model" OnValidSubmit="Submit">
+        <ValidationSummary />
         <p class="card-title">Регистрация</p>
         <InputText placeholder="Введите почту" @bind-Value="Model.Email"></InputText>
         <InputText placeholder="Введите пароль" @bind-Value="Model.Password"></InputText>

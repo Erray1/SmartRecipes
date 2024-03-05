@@ -7,4 +7,5 @@ public class RecipeData : RecipeDataBase
     public Dictionary<string, int> Rating { get; set; } = new();
     public List<IngredientAmountData> Ingredients { get; set; } = new();
     public string Description { get; set; } = string.Empty;
+    public string? UserRate { get; set; }
 }
