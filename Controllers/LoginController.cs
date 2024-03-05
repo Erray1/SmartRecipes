@@ -29,7 +29,7 @@ public sealed class LoginController : ControllerBase
 
         var claims = new[]
         {
-            new Claim(ClaimTypes.Email, "example@example.com")
+            new Claim(ClaimTypes.Email, request.Email)
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWTSecurityKey"]!));
