@@ -1,25 +1,25 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿
 using Microsoft.EntityFrameworkCore;
-using SmartRecipes.DataContext.Users.Models;
+using SmartRecipes.Services.SearchEngines;
 using SmartRecipes.Shared.DTO.Recipes;
 
 namespace SmartRecipes.Services.Recomendations;
 
 public sealed class RecomendationsService
 {
-    private readonly UserManager<User> userManager;
-    private readonly RecomendationsMaker maker;
-
-    public RecomendationsService(RecomendationsMaker maker, UserManager<User> userManager)
+    private readonly ISearchEngine searchEngine;
+    private readonly SearchTokensWorker searchTokensWorker;
+    public RecomendationsService(SimpleLargeInputSearch searchEngine, SearchTokensWorker searchTokensWorker)
     {
-        this.maker = maker;
-        this.userManager = userManager;
+        this.searchEngine = searchEngine;
+        this.searchTokensWorker = searchTokensWorker;
     }
     public async Task<RecipeListDto<RecipePreviewData>> GetRecomendationsPagedAsync(string userId, int itemsPerPage, int currentPage)
     {
-        User user = (await userManager.FindByIdAsync(userId))!;
+        var uniqueTokens = searchTokensWorker.GetUniqueTokensOrdered(userId, SearchProperties.Name);
+        var recipesQuery = searchEngine.Search(SearchProperties.Name, uniqueTokens);
 
-        var data = await maker.GetRecomendationsQuery(user)
+        var data = await recipesQuery
             .Skip((currentPage - 1) * itemsPerPage)
             .Take(itemsPerPage)
             .ToListAsync();

@@ -15,6 +15,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddResponseCaching();
+
 builder.Services.AddClientSideServices();
 
 builder.Services.AddRecipesContext(builder.Configuration);
@@ -39,6 +41,8 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
+
+app.UseResponseCaching();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

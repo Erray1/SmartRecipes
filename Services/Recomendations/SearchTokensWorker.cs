@@ -10,15 +10,22 @@ namespace SmartRecipes.Services.Recomendations;
 public class SearchTokensWorker
 {
     private readonly RecipesContext db;
-    public SearchTokensWorker(RecipesContext db)
+    private readonly IConfiguration appConfig;
+    public SearchTokensWorker(RecipesContext db, IConfiguration appConfig)
     {
         this.db = db;
+        this.appConfig = appConfig;
     }
-    public List<string> GetUniqueTokensOrdered(RecipesInteractedByUser recipes, SearchProperties searchProperty)
+    public List<string> GetUniqueTokensOrdered(string userId, SearchProperties searchProperty)
     {
+        var userActions = db.Ratings.Where(x => x.UserID == userId);
+        if (userActions is null)
+        {
+            return new();
+        }
         ISearchTokensGetter tokensGetter = SearchTokensGetters.CreateNew(searchProperty)!;
 
-        var preferences = calculateTokensPreferencesSorted(getActionIDsAndValues(recipes), tokensGetter);
+        var preferences = calculateTokensPreferencesSorted(getInteractedRecipesValues(userActions), tokensGetter);
         int minimalPreference = calculateMinimalTokensPreference(preferences);
 
         return preferences
@@ -28,23 +35,21 @@ public class SearchTokensWorker
         
     }
 
-    private Dictionary<string, int> calculateTokensPreferencesSorted(ImmutableDictionary<ICollection<string>, int> idsValues, ISearchTokensGetter tokensGetter)
+    private Dictionary<string, int> calculateTokensPreferencesSorted(ImmutableDictionary<IQueryable<Recipe>, int> groupedRecipes, ISearchTokensGetter tokensGetter)
     {
         Dictionary<string, TokenWeightAndCategories> tokensPreferences = new();
-        foreach (var pair in idsValues)
+        foreach (var pair in groupedRecipes)
         {
-            for (int i = 0; i < pair.Key.Count; i++)
+            for (int i = 0; i < pair.GetAllRecipes().Count(); i++)
             {
-                Recipe? recipe = db.Recipes.Find(pair.Key.ElementAt(i));
-
-				IEnumerable<string> tokens = tokensGetter.GetTokens(recipe);
+				IEnumerable<string> tokens = tokensGetter.GetTokens(pair.GetRecipe(i));
                 for (int j = 0; j < tokens.Count(); j++)
                 {
                     if (tokensPreferences.ContainsKey(tokens.ElementAt(j)))
                     {
-                        tokensPreferences[tokens.ElementAt(j)].Update(pair.Value, recipe!.Category.CategoryName);
+                        tokensPreferences[tokens.ElementAt(j)].Update(pair.GetPreference(), pair.GetRecipe(i).Category.CategoryName);
                     }
-                    tokensPreferences[tokens.ElementAt(j)] = new(pair.Value, recipe!.Category.CategoryName);
+                    tokensPreferences[tokens.ElementAt(j)] = new(pair.GetPreference(), pair.GetRecipe(i).Category.CategoryName);
 				}
             }
         }
@@ -60,17 +65,17 @@ public class SearchTokensWorker
     {
         return Convert.ToInt32(preferences.Values.Average());
     }
-    private ImmutableDictionary<ICollection<string>, int> getActionIDsAndValues(RecipesInteractedByUser recipes)
+
+    private ImmutableDictionary<IQueryable<Recipe>, int> getInteractedRecipesValues(IQueryable<Rate> userActions)
     {
-        Type type = recipes.GetType();
-        PropertyInfo[] properties = type.GetProperties();
-        return properties
-            .Select(prop =>
-            new KeyValuePair<ICollection<string>, int>(
-                (ICollection<string>)prop.GetValue(recipes)!,
-                prop.GetCustomAttribute<ActionTypeValueAttribute>()!.ActionValue
-                )
-            ).ToImmutableDictionary();
+        return userActions.GroupBy<Rate, int>(x => appConfig.GetValue<int>($"UserActionsValues:{x.RateType}") +
+            appConfig.GetValue<int>($"UserActionsValues:{CreationTimeWorker.GetStringPeriodRepresentation(x.RateCreation)}"))
+            .Select(x => new KeyValuePair<IQueryable<Recipe>, int>(
+                    x.AsQueryable().Select(r => r.RecipeRated),
+                    x.Key
+                ))
+            .ToImmutableDictionary();
+           
     }
 }
 

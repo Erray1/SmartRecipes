@@ -51,7 +51,6 @@ public static partial class BuilderExtensions
         services.AddScoped<IPathFinder, RandomPathFinderService>();
 
         services.AddScoped<RecomendationsService>();
-        services.AddScoped<RecomendationsMaker>();
         services.AddScoped<SearchTokensWorker>();
 
         return services;
