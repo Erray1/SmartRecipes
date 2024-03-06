@@ -23,7 +23,7 @@ public sealed class CreateRecipeModel
     public string RecipeDescription {  get; set; }
     [Required]
     public Dictionary<string, string> Ingredients { get; set; }
-    public Dictionary<string, int>? Rating { get; set; }
+    public Dictionary<string, int> Rating { get; set; }
     [Required]
     public int TimeToCook { get; set; }
 }

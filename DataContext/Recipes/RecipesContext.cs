@@ -17,6 +17,7 @@ public class RecipesContext : DbContext
     public virtual DbSet<Recipe> Recipes { get; set; }
     public virtual DbSet<IngredientPriceForShop> IngredientPrices { get; set; }
     public virtual DbSet<IngredientAmountForRecipe> IngredientAmounts { get; set; }
+    public virtual DbSet<Rate> Ratings { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -98,13 +99,10 @@ public class RecipesContext : DbContext
             .HasForeignKey<Image>();
 
         modelBuilder.Entity<Recipe>()
-            .Property(e => e.Rating)
-            .HasConversion(
-                v => JsonSerializer.Serialize(v, options),
-                s => JsonSerializer.Deserialize<Dictionary<string, int>>(s, options)!,
-                ValueComparer.CreateDefault(typeof(Dictionary<string, int>), false)
-            )
-            .IsRequired();
+            .HasMany(e => e.Rating)
+            .WithOne(e => e.RecipeRated)
+            .HasForeignKey(e => e.RecipeRatedID);
+
         modelBuilder.Entity<Recipe>()
             .Property(e => e.RecipeName)
             .HasMaxLength(30)
@@ -112,6 +110,17 @@ public class RecipesContext : DbContext
         modelBuilder.Entity<Recipe>()
             .Property(e => e.RecipeDescription)
             .HasMaxLength(6400)
+            .IsRequired();
+
+        // Rating
+        modelBuilder.Entity<Rate>()
+            .HasKey(e => e.RateID);
+
+        modelBuilder.Entity<Rate>()
+            .Property(e => e.RateCreation)
+            .HasDefaultValueSql("CURRENT_TEMISTAMP");
+        modelBuilder.Entity<Rate>()
+            .Property(e => e.UserID)
             .IsRequired();
 
     }

@@ -21,7 +21,10 @@ public static class RecipesDTOMapper
             Image = recipe.RecipeImage.ImageURL,
             IngedientsCount = recipe.Ingredients.Count(),
             Name = recipe.RecipeName,
-            Rating = recipe.Rating,
+            Rating = new() {
+                { "likes", recipe.Rating.Count(x => x.RateType == "like")},
+                { "dislikes", recipe.Rating.Count(x => x.RateType == "like") }
+            },
             TimeToCook = recipe.TimeToCook
         };
     }
@@ -33,7 +36,10 @@ public static class RecipesDTOMapper
             Image = recipe.RecipeImage.ImageURL,
             IngedientsCount = recipe.Ingredients.Count(),
             Name = recipe.RecipeName,
-            Rating = recipe.Rating,
+            Rating = new() { 
+                { "likes", recipe.Rating.Count(x => x.RateType == "like")},
+                { "dislikes", recipe.Rating.Count(x => x.RateType == "like") }
+            },
             TimeToCook = recipe.TimeToCook,
             Description = recipe.RecipeDescription,
             Ingredients = recipe.Ingredients.Select(x => new IngredientAmountData

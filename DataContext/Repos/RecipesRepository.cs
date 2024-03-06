@@ -18,12 +18,36 @@ public sealed class RecipesRepository : IRecipesRepository
         this.searchEngine = searchEngine;
     }
 
+    public async Task<RecipeListDto<RecipePreviewData>> GetLikedRecipesPagedAsync(string userId, int itemsPerPage, int currentPage)
+    {
+        var recipesSelected = await db.Recipes
+            .Where(x => x.Rating.Any(y => y.UserID == userId))
+            .Skip(itemsPerPage)
+            .Take((currentPage - 1) * itemsPerPage)
+            .ToListAsync();
+
+        if (recipesSelected is null || recipesSelected.Count() == 0)
+        {
+            return new()
+            {
+                IsSuccesful = false,
+                Errors = new() { "Вы не добавили ни одного рецепта в избранное" },
+                Content = new() { }
+            };
+        }
+        return new()
+        {
+            IsSuccesful = true,
+            Content = recipesSelected.Select(x => RecipesDTOMapper.ToDTOPreview(x)).ToList()
+        };
+    }
+
     public async Task<RecipeListDto<RecipePreviewData>> GetPopularRecipesPagedAsync(int itemsPerPage, int currentPage)
     {
         var recipesSelected = await db.Recipes
             .OrderByDescending(x => x.TimesVisited)
-            .ThenByDescending(x => x.TimesLiked)
-            .ThenBy(x => x.TimesDisliked)
+            .ThenByDescending(x => x.Rating.Where(y => y.RateType == "like"))
+            .ThenBy(x => x.Rating.Where(y => y.RateType == "dislike"))
             .Skip(itemsPerPage)
             .Take((currentPage - 1) * itemsPerPage)
             .ToListAsync();

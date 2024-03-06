@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using SmartRecipes.DataContext.Recipes;
 using SmartRecipes.DataContext.Recipes.Models;
 using SmartRecipes.DataContext.Users.Models;
@@ -9,17 +10,14 @@ namespace SmartRecipes.Services.Rating;
 public class UserActionService
 {
     private readonly RecipesContext db;
-    private readonly UserManager<User> userManager;
 
-	public UserActionService(RecipesContext db, UserManager<User> userManager)
+	public UserActionService(RecipesContext db)
     {
         this.db = db;
-        this.userManager = userManager;
     }
     public async Task<(int, RatingResult)> SaveRateAsync(string recipeId, string userId, RatingModel model)
     {
         Recipe? recipeFound = await db.Recipes.FindAsync(recipeId);
-        User userFound = (await userManager.FindByIdAsync(userId))!;
         if (recipeFound is null)
         {
             return (StatusCodes.Status404NotFound, new()
@@ -29,34 +27,62 @@ public class UserActionService
             });
         }
 
-        if (model.Type == "like" && userFound.LikedRecipesIDs.Contains(recipeId) && model.IsPositive ||
-            model.Type == "dislike" && userFound.DislikedRecipesIDs.Contains(recipeId) && model.IsPositive ||
-            model.Type == "like" && !userFound.LikedRecipesIDs.Contains(recipeId) && !model.IsPositive ||
-            model.Type == "dislike" && !userFound.DislikedRecipesIDs.Contains(recipeId) && !model.IsPositive)
+        var foundRate = await db.Ratings.SingleOrDefaultAsync(x => x.UserID == userId && x.RecipeRatedID == recipeFound.ID);
+
+        if (model.IsPositive)
         {
-            return (StatusCodes.Status400BadRequest, new()
+            if (foundRate is not null && foundRate.RateType == model.Type)
             {
-                IsSuccesful = false,
-                Errors = new() { String.Format("Оценка {0} {1}", model.Type, model.IsPositive ? "уже выставлена" : "не может быть снята")}
-            });
+                return (StatusCodes.Status400BadRequest, new()
+                {
+                    IsSuccesful = false,
+                    Errors = new() { $"Оценка {model.Type} уже выставлена" }
+                });
+            }
+            else if (foundRate is not null && foundRate.RateType != model.Type)
+            {
+                foundRate.RateType = model.Type;
+                foundRate.RateCreation = DateTime.Now;
+            }
+            else
+            {
+                Rate newRate = new()
+                {
+                    RecipeRated = recipeFound,
+                    UserID = userId,
+                    RateType = model.Type
+                };
+                var addedRate = await db.Ratings.AddAsync(newRate);
+                recipeFound.Rating.Add(addedRate.Entity);
+            }
         }
-
-        switch (model.Type)
+        else
         {
-            case "like":
-                userFound.LikedRecipesIDs.Add(recipeId);
-                recipeFound.Rating["likes"]++;
-                break;
-            case "dislike":
-                userFound.LikedRecipesIDs.Add(recipeId);
-                recipeFound.Rating["dislikes"]++;
-                break;
+            if (foundRate is null)
+            {
+                return (StatusCodes.Status400BadRequest, new()
+                {
+                    IsSuccesful = false,
+                    Errors = new() { $"Оценка {model.Type} не может быть снята тк рецепт не был оценён пользователем" }
+                });
+            }
+            else if (foundRate is not null && foundRate.RateType == model.Type)
+            {
+                recipeFound.Rating.Remove(foundRate);
+            }
+            else
+            {
+                return (StatusCodes.Status400BadRequest, new()
+                {
+                    IsSuccesful = false,
+                    Errors = new() { $"Оценка {model.Type} не может быть снята тк она не совпадает с существующей оценкой {foundRate!.RateType}" }
+                });
+            }
         }
 
-        bool affectedRecipe = (await db.SaveChangesAsync()) == 1;
-        bool affectedUser = (await userManager.UpdateAsync(userFound)).Succeeded;
+        bool affected = (await db.SaveChangesAsync()) == 1;
 
-        if (!affectedUser || !affectedRecipe)
+        if (!affected)
         {
             return (StatusCodes.Status500InternalServerError, new()
             {
@@ -74,16 +100,13 @@ public class UserActionService
     public async Task<bool> SaveVisitAsync(string recipeId, string userId)
     {
 		Recipe? recipeFound = await db.Recipes.FindAsync(recipeId);
-		User userFound = (await userManager.FindByIdAsync(userId))!;
 
         if (recipeFound is null) return false;
 
         recipeFound.TimesVisited++;
-        userFound.LastVisitedRecipesIDs.Add(recipeFound.ID);
 
         bool affectedRecipes = (await db.SaveChangesAsync()) == 1;
-        bool affectedUsers = (await userManager.UpdateAsync(userFound)).Succeeded;
 
-        return affectedRecipes && affectedUsers;
+        return affectedRecipes;
 	}
 }

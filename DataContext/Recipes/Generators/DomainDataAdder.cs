@@ -2,6 +2,8 @@
 using SmartRecipes.DataContext.Recipes.Models;
 using SmartRecipes.DataContext.Recipes.Generators.Utilities;
 using Microsoft.EntityFrameworkCore;
+using System.Collections;
+using System.Collections.ObjectModel;
 
 namespace SmartRecipes.DataContext.Recipes.Generators;
 
@@ -55,7 +57,6 @@ public sealed class DomainDataAdder : IDomainDataAdder
             RecipeDescription = RecipeDescriptionHandler.ToHTML(model.RecipeDescription),
             Category = foundCategory,
             TimeToCook = model.TimeToCook,
-            Rating = model.Rating is null ? default! : model.Rating, // ?
             Ingredients = await db.Ingredients
                 .Where(e => model.Ingredients
                     .Select(m => m.Key)
@@ -81,13 +82,29 @@ public sealed class DomainDataAdder : IDomainDataAdder
         db.AddRange(amounts);
 
         recipe.IngredientsAmounts = amounts.ToList();
-        foundCategory.RecipesWhereUsed.Add(newRecipe);;
+        recipe.Rating = await addRatesAsync("initialDataFill_AdminID", recipe, model.Rating["likes"], model.Rating["dislikes"]);
+        foundCategory.RecipesWhereUsed.Add(newRecipe);
         addedRecipe.State = EntityState.Modified;
         
         int affected = await db.SaveChangesAsync();
         if (affected == 0) return (false, "Ошибка при обновлении базы данных");
 
         return (true, null);
+
+    }
+    private async Task<ICollection<Rate>> addRatesAsync(string adminId, Recipe recipe, int likesCount, int dislikesCount)
+    {
+        var newRates = Enumerable.Range(1, likesCount + dislikesCount)
+            .Select(x => new Rate()
+            {
+                UserID = adminId,
+                RecipeRated = recipe,
+                RecipeRatedID = recipe.ID,
+                RateType = x <= likesCount ? "like" : "dislike"
+            })
+            .ToList();
+        db.Ratings.AddRange(newRates);
+        return await db.Ratings.Where(x => x.UserID == adminId).ToListAsync();
 
     }
 
