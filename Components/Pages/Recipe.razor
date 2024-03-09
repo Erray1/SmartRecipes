@@ -38,6 +38,10 @@
 
 
 @code {
+    [SupplyParameterFromQuery]
+    public string recipeID { get; set;  }
+
+    [Parameter]
     public RecipePreviewData Model { get; set; }
 
     protected override void OnInitialized()

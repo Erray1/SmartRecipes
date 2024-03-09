@@ -18,13 +18,13 @@
 .text {
     margin: 0.5vh 25px;
     font-family: 'Minecraft';
-    font-size: 0.8em;
+    font-size: 80%;
     text-align: start;
 }
 
 .card-title {
-    margin: 0px 25px 10px;
-    font-size: 1.25em;
+    margin: 0px 20px 10px;
+    font-size: 80%;
     font-family: 'Press Start 2P';
 }
 
@@ -46,6 +46,5 @@
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
-    margin-top: 50px;
-    margin-left: 25px;
+    margin: 10px 20px
 }
