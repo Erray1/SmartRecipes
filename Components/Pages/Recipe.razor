@@ -17,8 +17,6 @@
                     <p class="text">@Model.Rating["likes"]</p>
                     <img src="img/dislike.png" width="7%" height="7%">
                     <p class="text">@Model.Rating["dislikes"]</p>
-                        <img src="img/bookmark.png" width="7%" height="7%">
-                        <p class="text">Добавить в избранное</p>
                 </div>
             </div>
             <div class="ingredients">
@@ -48,7 +46,7 @@
     {
         Model = new()
             {
-                Name = "Пирог с говном",
+                Name = "Салат '8 марта'",
                 IngedientsCount = 8,
                 TimeToCook = 1,
                 Rating = new() { { "likes", 17 }, { "dislikes", 10 } },
