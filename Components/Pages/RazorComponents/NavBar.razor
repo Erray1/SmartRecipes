@@ -4,7 +4,6 @@
 <!--Важно прописать namespace-->
 
 
-<CascadingAuthenticationState>
     <AuthorizeView>
         <Authorized>
             <div class="header">
@@ -33,7 +32,6 @@
             </div>
         </NotAuthorized>
     </AuthorizeView>
-</CascadingAuthenticationState>
 
 @code {
     [Inject]
@@ -49,5 +47,9 @@
         {
             navManager.NavigateTo("sign_in");
         }
+    }
+    public async Task Logout()
+    {
+
     }
 }

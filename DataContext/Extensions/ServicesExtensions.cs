@@ -29,7 +29,6 @@ public static partial class ServicesExtensions
             });
             options.LogTo(Console.WriteLine, new[] { Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.CommandExecuting });
         });
-        services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<UsersContext>();
         return services;
     }
 }

@@ -1,10 +1,14 @@
 using SmartRecipes.DataContext.Extensions;
 using SmartRecipes.BuilderExtensions;
 using SmartRecipes.DataContext.Repos.Extensions;
+using Microsoft.AspNetCore.Identity;
+using SmartRecipes.DataContext.Users.Models;
+using SmartRecipes.DataContext.Users;
 using SmartRecipes.Components;
+using SmartRecipes.Application.Accounts;
 
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder? builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
@@ -14,18 +18,31 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+builder.Services.AddCascadingAuthenticationState(); //
+builder.Services.AddAccountServices();
 
-builder.Services.AddResponseCaching();
-
-builder.Services.AddClientSideServices();
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = IdentityConstants.ApplicationScheme;
+    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+})
+    .AddIdentityCookies();
 
 builder.Services.AddRecipesContext(builder.Configuration);
 builder.Services.AddUsersContext(builder.Configuration);
+
+builder.Services.AddIdentityCore<User>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<UsersContext>()
+    .AddSignInManager()
+    .AddDefaultTokenProviders(); // Test
+
 builder.Services.AddRepositories();
 
 builder.Services.AddCustomServices()
-    .AddJWTAuthentificationAndAuthorization(builder.Configuration)
     .AddCustomFeatures(builder.Configuration);
+
+builder.Services.AddResponseCaching();
+
 
 var app = builder.Build();
 
@@ -35,6 +52,10 @@ if (app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+else
+{
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
@@ -47,9 +68,11 @@ app.UseResponseCaching();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-app.UseAuthentication();
+app.UseAuthentication(); // ?
 app.UseAuthorization();
 
-app.MapControllers();
+app.MapAdditionalIdentityEndpoints();
+
+//app.MapControllers();
 
 app.Run();
