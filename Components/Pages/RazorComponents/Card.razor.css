@@ -18,7 +18,7 @@
 .text {
     margin: 0.5vh 25px;
     font-family: 'Minecraft';
-    font-size: 80%;
+    font-size: 60%;
     text-align: start;
 }
 
@@ -38,6 +38,7 @@
 
 .long {
     width: 900px;
+    margin: 20px 20px 10px;
 }
 
 .reactions {
