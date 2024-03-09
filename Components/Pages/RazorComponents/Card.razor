@@ -3,7 +3,7 @@
 @using SmartRecipes.Application.Utilities
 <!--Важно прописать namespace-->
 
-<NavLink href="@($"recipes/{Model.ID}")">
+<NavLink href="@($"recipes?recipeID={Model.ID}")">
     <div class="card @cardType scale">
         <img class="images" src="@Model.Image">
         <div>
@@ -39,7 +39,7 @@
         };
         Model = new()
             {
-                Name = "Пирог с говном",
+                Name = "Салат '8 марта'",
                 IngedientsCount = 8,
                 TimeToCook = 1,
                 Rating = new() { { "likes", 17 }, { "dislikes", 10 } },
