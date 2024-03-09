@@ -9,10 +9,6 @@ public static partial class LINQExtensionsShops
 {
     public static IngredientPriceForShop TakeBestOffer(this IQueryable<IngredientPriceForShop> ingredientsData, ShopsFilterOptions options, IPathFinder pathFinder, Dictionary<string, int> pathTimeStorage)
     {
-        //Expression<Func<IngredientPriceForShop, object>> expr = options.FilterString switch
-        //{
-        //    "price" => 
-        //}
         IngredientPriceForShop priceForShop;
         switch (options.FilterString)
         {

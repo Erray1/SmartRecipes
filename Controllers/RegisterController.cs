@@ -20,7 +20,7 @@ public sealed class RegisterController : ControllerBase
     [HttpPost]
     public async Task<ActionResult> Register([FromBody] RegisterModel model)
     {
-        User newUser = new() { Email = model.Email };
+        User newUser = new() { Email = model.Email, UserName = model.Email };
 
         var result = await userManager.CreateAsync(newUser, model.Password!);
 

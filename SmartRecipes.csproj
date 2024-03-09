@@ -7,8 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Application\Accounts\AuthAPIClient.cs" />
+    <Compile Remove="Application\Accounts\AuthStateProvider.cs" />
+    <Compile Remove="Application\Accounts\IAuthAPIClient.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
     <PackageReference Include="Blazored.Modal" Version="7.3.1" />
+    <PackageReference Include="DataAnnotationsExtensions" Version="5.0.1.27" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.2" />
@@ -24,6 +31,7 @@
     <PackageReference Include="Microsoft.FeatureManagement" Version="3.2.0" />
     <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="3.2.0" />
     <PackageReference Include="Microsoft.Identity.Client" Version="4.59.0" />
+    <PackageReference Include="Npgsql" Version="8.0.2" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.2" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.5.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.5.0" />
@@ -32,6 +40,8 @@
   <ItemGroup>
     <Folder Include="DataContext\Migrations\Recipes\" />
     <Folder Include="DataContext\Migrations\Users\" />
+    <Folder Include="DataContext\Utilities\" />
+    <Folder Include="Temp\" />
     <Folder Include="wwwroot\img\recipes\" />
   </ItemGroup>
 

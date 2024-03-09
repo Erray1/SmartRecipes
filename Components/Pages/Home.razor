@@ -1,8 +1,14 @@
 ﻿@page "/home"
 @namespace SmartRecipes.Server.Components.Pages.RazorComponents
+@using Microsoft.AspNetCore.Identity
 @using SmartRecipes.Application.Utilities
 
 <PageTitle>Home</PageTitle>
+
+<p>
+    
+</p>
+
 
 <div class="body">
     <div class="main">
@@ -18,4 +24,11 @@
 </div>
 
 @code {
+    [CascadingParameter]
+    private HttpContext httpContext { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+    }
 }

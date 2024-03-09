@@ -22,6 +22,7 @@ public sealed class RecipesController : ControllerBase
     [HttpGet("get-popular")]
     [ProducesResponseType(200)]
     [ProducesResponseType(404)]
+    [ResponseCache(Duration = 86400, Location = ResponseCacheLocation.Any, VaryByQueryKeys = ["currentPage"])]
     public async Task<IActionResult> GetPopularRecipes([FromQuery] int itemsPerPage, [FromQuery] int currentPage)
     {
         var response = await repo.GetPopularRecipesPagedAsync(itemsPerPage, currentPage);
@@ -39,7 +40,7 @@ public sealed class RecipesController : ControllerBase
     public async Task<IActionResult> GetLikedRecipes(UserManager<User> userManager)
     {
         User user = (await userManager.FindByEmailAsync(User.FindFirst(ClaimTypes.Email)!.Value))!;
-        var response = await repo.GetRecipesByIDPagedAsync(user.LikedRecipesIDs, 
+        var response = await repo.GetLikedRecipesPagedAsync(user.Id, 
             Convert.ToInt32(Request.Query["itemsPerPage"]),
             Convert.ToInt32(Request.Query["currentPage"]));
         
@@ -54,11 +55,12 @@ public sealed class RecipesController : ControllerBase
     [ProducesResponseType(200)]
     [ProducesResponseType(400)]
     [Authorize]
+    [ResponseCache(Duration = 43200, Location = ResponseCacheLocation.Any)]
     public async Task<IActionResult> GetRecommendedRecipes(RecomendationsService recs, UserManager<User> userManager)
     {
         User user = (await userManager.FindByEmailAsync(User.FindFirst(ClaimTypes.Email)!.Value))!;
 
-        var response = await recs.GetRecomendationsPagedAsync(user.Id!,
+        var response = await recs.GetRecomendationsPagedAsync(user.Id,
             Convert.ToInt32(Request.Query["itemsPerPage"]),
             Convert.ToInt32(Request.Query["currentPage"]));
 
@@ -77,7 +79,7 @@ public sealed class RecipesController : ControllerBase
     {
         User user = (await userManager.FindByEmailAsync(User.FindFirst(ClaimTypes.Email)!.Value))!;
 
-        var data = await repo.GetRecipesByIDAsync(user.LastVisitedRecipesIDs.Items);
+        var data = await repo.GetRecipesByIDAsync((Request.Query["ids"]).ToString().Split('|'));
         if (!data.IsSuccesful)
         {
             return NotFound(data);

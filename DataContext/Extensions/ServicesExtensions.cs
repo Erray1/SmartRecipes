@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SmartRecipes.DataContext.Recipes;
 using SmartRecipes.DataContext.Users;
 using SmartRecipes.DataContext.Users.Models;
+using Npgsql;
 
 namespace SmartRecipes.DataContext.Extensions;
 
@@ -12,7 +13,8 @@ public static partial class ServicesExtensions
     {
         services.AddDbContext<RecipesContext>(options =>
         {
-            options.UseNpgsql(configuration.GetConnectionString("WebApiPostgreSQLDatabase"));
+            options.UseNpgsql(configuration.GetConnectionString("RecipesPostgreSQLDatabase"));
+           
             options.LogTo(Console.WriteLine, new[] { Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.CommandExecuting });
         });
         return services;
@@ -21,13 +23,12 @@ public static partial class ServicesExtensions
     {
         
         services.AddDbContext<UsersContext>(options => {
-            options.UseNpgsql(configuration.GetConnectionString("WebApiPostgreSQLDatabase"), providerOptions =>
+            options.UseNpgsql(configuration.GetConnectionString("UsersPostgreSQLDatabase"), providerOptions =>
             {
-                providerOptions.SetPostgresVersion(new Version(""));
+
             });
             options.LogTo(Console.WriteLine, new[] { Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.CommandExecuting });
         });
-        services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<UsersContext>();
         return services;
     }
 }
